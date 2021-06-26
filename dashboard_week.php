@@ -224,7 +224,7 @@
         if(empty($f_moorea[$key])){
             $f_moorea[$key] = 0;
         }
-        $final_data.= "['".$date."',".intval($c_tahiti[$key]).",".intval($c_moorea[$key]).",".intval($f_tahiti[$key]).",".intval($f_moorea[$key])."],";
+        $final_data.= "['".$date."',".intval($c_tahiti[$key]).",'".intval($c_tahiti[$key])."%',".intval($c_moorea[$key]).",'".intval($c_moorea[$key])."%',".intval($f_tahiti[$key]).",'".intval($f_tahiti[$key])."%',".intval($f_moorea[$key]).",'".intval($f_moorea[$key])."%'],";
     }
     
 
@@ -241,6 +241,7 @@
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
         <link href="./assets/css/bootstrap.min.css" rel="stylesheet">
 
         <title>Dashboard TWD</title>
@@ -376,44 +377,100 @@
                 <div class="card">
                     <section class="border  d-flex justify-content-center">
                             
-                        <div class="col-lg-12">
-                            <!-- <div id="chart-bar" style="height: 100%;" class="chart">
-                                
-                            </div> -->
-                            <div id="columnchart_material" style="height: 500px;"></div>
+                        <div class="col-lg-12" >
+                            <div style="height: 500px;" id="columnchart_material"></div>
                         </div>
                     </section>
+                </div>
+                <div class="card mt-3">
+                    <div class="row d-flex justify-content-around">
+                        <div class="col-md-2 my-auto">
+                            <div class="container">
+                                <div class="card" id="show_png">
+                                    <a id="image" type="button" class="bg-warning form-control" >PNG</a>
+                                </div>    
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <!--Section: Demo-->
             </div>
         </div>
 
-        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-
+        <!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
+        <script src="assets/js/jquery.js"></script>
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> -->
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.min.js"></script> -->
         <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.min.js"></script>
         <script type="text/javascript">
-            google.charts.load('current', {'packages':['bar']});
-            google.charts.setOnLoadCallback(drawChart);
-
-            function drawChart() {
-                var data = google.visualization.arrayToDataTable([
-                    ['Jours','Catam Tahiti','Catam Moorea','Ferry Tahiti','Ferry Moorea'],
-                    <?=$final_data ?>
+            var img_url = '';
+    
+            $(document).ready(function () {
+            
+                // $('#image').click(function(){
                     
-                    ]);
+                //     // $('body').append(debugBase64(img_url));
+                //     // img_url = debugBase64(img_url);
+                //     // console.log(img_url);
+                //     window.location.replace(img_url);
+                // })
+
+            
+            });
+
+            
+            google.charts.load('current', {packages: ['corechart', 'bar']});
+            google.charts.setOnLoadCallback(drawAnnotations);
+            
+            function drawAnnotations() {
+                var data = new google.visualization.DataTable();
+                data.addColumn('string', 'Jours');
+                data.addColumn('number', 'Catam Tahiti');
+                data.addColumn({type: 'string', role: 'annotation'});
+                data.addColumn('number', 'Catam Moorea');
+                data.addColumn({type: 'string', role: 'annotation'});
+                data.addColumn('number', 'Ferry Tahiti');
+                data.addColumn({type: 'string', role: 'annotation'});
+                data.addColumn('number', 'Ferry Moorea');
+                data.addColumn({type: 'string', role: 'annotation'});
+                
+                data.addRows([
+                    <?=$final_data ?>
+                ]);
 
                 var options = {
-                chart: {
-                    title: 'Voyage en périodes',
-                    subtitle: 'Chiffres exprimes en %',
-                }
-                };
+                        title: 'Voyage en périodes',
+                        annotations: {
+                            alwaysOutside: true,
+                                textStyle: {
+                                    fontSize: 14,
+                                    color: '#000',
+                                    auraColor: 'none'
+                                }
+                        }
+                    };
 
-                var chart = new google.charts.Bar(document.getElementById('columnchart_material'));
+                    var chart = new google.visualization.ColumnChart(document.getElementById('columnchart_material'));
+                    google.visualization.events.addListener(chart, 'ready', function () {
+                        
+                        var png_click = document.getElementById('columnchart_material');
+                        png_click.innerHTML = '<img src="'+chart.getImageURI()+'">';
+                        document.getElementById('image').setAttribute("href", debugBase64(chart.getImageURI()))
+                        // document.getElementById('show_png').outerHTML = '<a id="image" type="button" class="bg-warning form-control" href="' + debugBase64(chart.getImageURI()) + '">PNG</a>'; 
+                    });
+                    
+                    chart.draw(data, options);
+            }
 
-                chart.draw(data, google.charts.Bar.convertOptions(options));
+            /**
+             * Display a base64 URL inside an iframe in another window.
+             */
+            function debugBase64(base64URL){
+                // window.open(base64URL);
+                var win = window.open(base64URL);
+                win.document.write('<iframe src="' + base64URL  + '" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>');
             }
         </script>
 
